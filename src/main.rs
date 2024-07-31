@@ -129,11 +129,11 @@ impl Supervisor for ObserverSupervisor {
     type Children = (Broker,BrokerClient);
 
     fn init(config: &mut SupervisorConfig<Self>, _: ()) {
-        // If the child fails, just restart it.
+        //restart any children that die
         config.set_strategy(SupervisorStrategy::OneForAll);
-        // Start child with stat 0
+
         config.set_args(((),() ));
-        // Name child 'hello'
+
         config.set_names((Some("broker_process".to_owned()), Some("broker_client".to_owned())));
     }
 }
@@ -148,13 +148,13 @@ fn main(_: Mailbox<()>) {
         Broker::start(()).unwrap()
     } );
     
-    // let broker: ProcessRef<Broker> = Broker::start(()).unwrap();
+    //send some messages
     broker.send(BrokerMessage::InternalMessage { topic: "all".to_owned(), message: "tell broker hello".to_owned() });
 
     let client: ProcessRef<BrokerClient> = ProcessRef::<BrokerClient>::lookup(&"broker_client").unwrap_or_else( || {
         println!("client not running, starting");
         BrokerClient::start(()).unwrap()
     } );
-    // let client = BrokerClient::start(()).unwrap();
+ 
     client.send(ClientMessage::Notification { topic: "none".to_owned(), message: "tell client hello".to_owned() });
 }
