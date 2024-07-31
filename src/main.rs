@@ -52,11 +52,16 @@ impl AbstractProcess for Broker {
 }
 
 impl MessageHandler<BrokerMessage> for Broker {
-    fn handle(_: State<Self>, msg: BrokerMessage) {
+    fn handle(mut state: State<Self>, msg: BrokerMessage) {
         match msg {
             BrokerMessage::Subscribe {topic, subscriber} => { 
-                //TODO: add to list of subscribers?
+                state.subscribers.push(subscriber.clone());
                 println!("process named: {} subscribed to topic: {}", subscriber, topic);
+                println!("Current subscribers: ");
+
+                state.subscribers.iter().for_each(|subscriber| {
+                    println!("{}", subscriber);
+                });
              },
             BrokerMessage::Publish {topic, message} => {  
                 println!("{}: {}", topic, message);
